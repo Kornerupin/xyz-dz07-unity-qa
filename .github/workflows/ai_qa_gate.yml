@@ -52,6 +52,7 @@
           "id": "unity_tests",
           "uses": "game-ci/unity-test-runner@32e57712352b500e17974b245a6dce9e11a73213",
           "env": {
+            "GAME_CI_COVERAGE_ENABLED": "false",
             "UNITY_LICENSE": "${{ secrets.UNITY_LICENSE }}",
             "UNITY_EMAIL": "${{ secrets.UNITY_EMAIL }}",
             "UNITY_PASSWORD": "${{ secrets.UNITY_PASSWORD }}",
