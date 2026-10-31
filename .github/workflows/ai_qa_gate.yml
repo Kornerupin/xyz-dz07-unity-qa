@@ -50,7 +50,7 @@
         {
           "name": "Run Unity EditMode and PlayMode tests",
           "id": "unity_tests",
-          "uses": "game-ci/unity-test-runner@v4",
+          "uses": "game-ci/unity-test-runner@32e57712352b500e17974b245a6dce9e11a73213",
           "env": {
             "UNITY_LICENSE": "${{ secrets.UNITY_LICENSE }}",
             "UNITY_EMAIL": "${{ secrets.UNITY_EMAIL }}",
@@ -58,10 +58,10 @@
             "UNITY_SERIAL": "${{ secrets.UNITY_SERIAL }}"
           },
           "with": {
+            "cliVersion": "v0.1.72",
             "projectPath": ".",
             "unityVersion": "6000.4.0f1",
             "testMode": "All",
-            "coverageEnabled": false,
             "artifactsPath": "artifacts/unity",
             "githubToken": "${{ secrets.GITHUB_TOKEN }}",
             "checkName": "CraftTest results"

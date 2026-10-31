@@ -111,6 +111,7 @@ git push
 
 - Ошибка SSH: выполни ssh -T git@github.com в обычном PowerShell. При Permission denied (publickey) нужно проверить, что существующий ключ добавлен в аккаунт Kornerupin и доступен используемому SSH-клиенту. Не заменяй ключи и не переходи на HTTPS для обхода этой проверки.
 - Нет Actions: проверь .github/workflows/ai_qa_gate.yml в ветке main и разрешение Actions в Settings.
+- `Unknown argument: noCoverageEnabled`: GameCI останавливается до запуска Unity. Исправлено удалением `coverageEnabled: false` и закреплением GameCI CLI v0.1.72. Отправь исправленный коммит через `git push` и дождись нового запуска Actions; повтор старого запуска использует прежний workflow. Эта ошибка не проверяет лицензию и не считается намеренным падением теста крафта.
 - Ошибка Unity activation: перепроверь три Unity Secrets и официальную инструкцию GameCI.
 - Упала установка/загрузка модели: открой соответствующий шаг и artifacts/ollama/pull.log; затем Re-run failed jobs. Артефакт исходного Unity запуска передаётся по имени из родительской job.
 - Анализатор отклонил ответ: проверь artifacts/ai/status.json и api_response.json. Не заменяй диагноз вручную; повтори реальную генерацию после исправления причины. Если не хватает времени/памяти, эти ограничения видны в логе.

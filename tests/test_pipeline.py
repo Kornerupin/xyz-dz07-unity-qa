@@ -250,6 +250,11 @@ class WorkflowTests(unittest.TestCase):
         self.assertFalse(any(step.get("continue-on-error") for step in steps))
         self.assertEqual(ids["unity_tests"]["with"]["unityVersion"], "6000.4.0f1")
         self.assertEqual(ids["unity_tests"]["with"]["testMode"], "All")
+        # GameCI CLI v0.1.72 rejects the --no-coverageEnabled flag emitted for false.
+        self.assertNotIn("coverageEnabled", ids["unity_tests"]["with"])
+        self.assertEqual(ids["unity_tests"]["with"]["cliVersion"], "v0.1.72")
+        self.assertEqual(ids["unity_tests"]["uses"],
+                         "game-ci/unity-test-runner@32e57712352b500e17974b245a6dce9e11a73213")
         self.assertNotIn("customParameters", ids["unity_tests"]["with"])
         self.assertEqual(ids["failure_evidence"]["if"], "${{ failure() && steps.unity_tests.outcome == 'failure' }}")
         job = config["jobs"]["ai-report"]
