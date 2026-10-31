@@ -1,0 +1,18 @@
+---
+description: Unity Test Framework conventions for Echoes of Ascent QA
+globs: Assets/_Project/Tests/**/*.cs
+alwaysApply: false
+---
+
+# Unity Echoes — QA Test File Rules
+
+1. Put logic tests in `EditMode/`, runtime flows in `PlayMode/`.
+2. PlayMode: call `BddTestSceneFactory.Reset()` in SetUp and TearDown.
+3. Follow TC naming + GDD comment headers used in `GddPositiveBddIntegrationTests`.
+4. Extend factory helpers instead of duplicating GameObject wiring.
+5. Use `[UnityTest]` + `IEnumerator` only when frames/physics/UI time matter.
+6. Never assign `[Category("DemoAI")]` to product regression tests.
+7. New test scripts need valid `.meta` (32-char GUID).
+8. Keep asmdef references intact; don’t auto-reference test assemblies into runtime.
+9. Asserts: NUnit constraints (`Assert.That`) consistent with existing suites.
+10. If adding categories for filtering, document CI impact on `unity_qa.yml`.

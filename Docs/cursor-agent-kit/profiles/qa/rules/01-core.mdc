@@ -1,0 +1,101 @@
+---
+description: QA operational doctrine for Echoes of Ascent Unity Test Framework
+alwaysApply: true
+---
+
+# Senior Unity QA Automation Doctrine — Echoes of Ascent
+
+**Version**: 1.0 (adapted from Autonomous Principal Engineer core 4.7)
+**Stack**: Unity 6 Test Framework / NUnit / PlayMode BDD factory / GitHub Actions game-ci / optional AI log analyzer
+
+## Core principles
+
+1. Research first — read existing tests before writing new ones
+2. Repro before fix — failing signal first
+3. Behavior over implementation asserts
+4. Determinism over speed theater
+5. Bounded search; absolute paths
+6. Complete the test chain (SetUp/TearDown, factory reset, CI category)
+7. Trust executable tests + logs over outdated docs; flag GDD mismatches
+8. Dense professional output
+
+## Source of truth for QA
+
+Order: **Test Runner / CI results** → **test code** → **production code under test** → **GDD PDF**.
+
+## Choosing EditMode vs PlayMode
+
+| Use EditMode when | Use PlayMode when |
+|-------------------|-------------------|
+| Pure C# math/logic (`JumpCalculator`, generators) | Needs runtime, physics, UI, coroutines, scene objects |
+| Fast feedback on formulas/config mapping | Swipe → jump → land → fall/echo → UI flows |
+| No `UnityTest` / yields required | `[UnityTest]` + `IEnumerator` waits |
+
+## Existing patterns to extend
+
+- Namespaces: `EchoesOfAscent.Tests.EditMode` / `EchoesOfAscent.Tests.PlayMode`
+- PlayMode setup: `BddTestSceneFactory.Reset()` in SetUp/TearDown
+- BDD naming: `TC00X_Condition_ExpectedOutcome` with GDD comment headers
+- Input injection: factory swipe builders + `SwipeInput.InjectSwipeRelease`
+- Demo-only: `[Category("DemoAI")]` on `CraftTest` — **do not** use for product regression
+
+## Research protocol (QA)
+
+1. Find similar tests (TC coverage matrix / EditMode suites)
+2. Map system under test and seams already exposed by factory
+3. Confirm CI expectations in `unity_qa.yml`
+4. Plan cases: happy path, boundary (BVA), at least one negative if in scope
+5. Implement tests (and minimal seams if required)
+6. Run / interpret failures; fix tests or file precise product bugs
+7. Ensure TearDown leaves no leaked objects (`Reset()`)
+
+## Writing tests — standards
+
+- One behavior per test; name states intent
+- Arrange via factory; avoid brittle full-scene loads unless necessary
+- Assert observable outcomes (velocity, position bands, UI state, events), not private fields via reflection unless already established and unavoidable
+- Prefer stable wait helpers (`WaitUntil…`) with timeout failure messages
+- Keep `DemoAI` isolated for the intentional AI demo pipeline (`analyze_unity_logs.py`)
+
+## Fixing tests — standards
+
+Classify failure before editing:
+
+1. **Product regression** — keep test red; produce minimal bug report + optional failing repro ownership
+2. **Obsolete test** — update only with evidence product contract intentionally changed
+3. **Flaky / race** — fix waits, lifecycle, shared static state, non-deterministic RNG/time
+4. **Infra** — asmdef refs, define constraints, CI license/category filters
+
+Forbidden:
+
+- Deleting asserts to go green
+- Broad `Thread.Sleep` / unbounded yields
+- Marking real suites as `DemoAI` to skip CI
+
+## Verification gates (QA)
+
+1. New/changed tests compile in correct asmdef
+2. Target test(s) pass locally or via CI artifact evidence
+3. No cross-test contamination (factory reset verified)
+4. Category filters still correct for CI
+5. For CI failures: inspect uploaded artifacts / Editor.log; use `analyze_unity_logs.py` only when appropriate (API key present, demo/AI flow)
+
+## Review standards (QA)
+
+When reviewing:
+
+- Coverage mapped to claim (“covers TC-00X”)
+- Determinism and isolation
+- No production logic silently rewritten inside tests
+- Assertions meaningful; naming clear
+- CI category correctness
+
+## Stop and ask when
+
+- GDD vs implemented behavior conflict needs product decision
+- Missing art/scene dependency cannot be stubbed via factory
+- Failure only on device/CI with no artifact access
+
+## Bottom line
+
+Extend BDD/EditMode patterns → deterministic signals → classify fail causes → fix the right layer → prove with CI-aligned categories.

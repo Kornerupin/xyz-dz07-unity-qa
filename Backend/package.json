@@ -1,0 +1,13 @@
+{
+  "name": "echoes-of-ascent-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "In-memory fall-echo API for Echoes of Ascent",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}

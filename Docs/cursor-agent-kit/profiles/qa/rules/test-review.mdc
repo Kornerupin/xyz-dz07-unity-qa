@@ -1,0 +1,31 @@
+---
+description: QA review checklist for autotest and testability PRs
+globs: Assets/_Project/Tests/**/*.{cs,asmdef}
+alwaysApply: false
+---
+
+# QA Code / Test Review
+
+## Must check
+
+1. Claimed scenarios vs actual asserts
+2. EditMode vs PlayMode appropriateness
+3. Isolation (Reset/TearDown, no shared dirty state)
+4. Determinism (waits, fixed configs, no time races)
+5. Category/CI alignment (`DemoAI` misuse?)
+6. Factory extension quality vs copy-paste setups
+7. Whether failures would diagnose product bugs clearly
+
+## Output
+
+```
+Verdict: APPROVE | REQUEST CHANGES | BLOCK
+Findings:
+- [P0/P1/P2] path — issue — fix
+Coverage map:
+- TC / behavior → test name
+Flake risks:
+- ...
+CI:
+- ...
+```

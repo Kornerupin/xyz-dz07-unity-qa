@@ -1,0 +1,20 @@
+---
+description: Source/asset conventions under SRC_ROOT (adjust globs)
+globs: "**/*.{cs,ts,tsx,js,jsx,py,shader,prefab,asset,unity,mat}"
+alwaysApply: false
+---
+
+# Source Tree Rules (Universal)
+
+> **CUSTOMIZE:** Narrow `globs` to your `SRC_ROOT` (example Unity: `Assets/_Project/**/*.{cs,shader,prefab,asset,unity,mat}`).
+
+When editing production code/assets:
+
+1. Match existing namespace/package + `CODE_LAYERS` conventions.
+2. Create/update required sidecars (e.g. Unity `.meta` with 32-hex GUID).
+3. Prefer config in `DATA_CONFIG_ROOT` over magic numbers.
+4. Prefer wiring patterns already used by test fixtures when adding testable hooks.
+5. Do not “fix” flakes by weakening asserts without root cause.
+6. Keep tooling-only code in `EDITOR_OR_TOOLING_ROOT`.
+7. If changing core math/contracts, update or add unit tests.
+8. If changing flows covered by integration scenarios, ensure tests still express the contract (coordinate with QA for large suite work).

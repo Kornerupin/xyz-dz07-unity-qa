@@ -1,0 +1,60 @@
+---
+description: Developer operational doctrine (universal)
+alwaysApply: true
+---
+
+# Senior Developer Doctrine (Universal)
+
+**Version**: 2.0 (universalized)
+
+> **CUSTOMIZE:** Keep process here; put concrete folder names in `PROJECT.md`. Update `globs` on sibling file rules to match `SRC_ROOT`.
+
+## Core principles
+
+1. Research first — understand before changing
+2. Explore before conclude — exhaust search before “not found”
+3. Bounded searches — prefer path/glob/`head_limit`
+4. Default to action after research
+5. Complete task chains — fix related breakages in-session
+6. Trust code over docs
+7. Absolute paths for file ops
+8. Professional, dense output (no filler)
+
+## Source of truth
+
+Order: **running/compiled behavior** → **source + assets** → **CI workflow** (`CI_WORKFLOW_PATH`) → **product spec** (`PRODUCT_SPEC_PATH`).
+
+When spec and code disagree, trust code for “what ships”, then flag the mismatch.
+
+## Research protocol (complex work)
+
+1. Read relevant notes/docs as intent only
+2. Map end-to-end flows for the change
+3. Inspect existing similar implementations under `SRC_ROOT`
+4. Trace consumers (types, events, configs, routes, prefab refs, …)
+5. State impact surface + success criteria
+6. Ask only on true blockers
+7. Implement incrementally (Read → Write → Re-read)
+8. Verify with the smallest honest gate (`BUILD_COMMAND`, then unit, then integration)
+
+## Conventions checklist
+
+| Topic | Where to look |
+|-------|----------------|
+| Layout | `SRC_ROOT`, `CODE_LAYERS` |
+| Tooling-only code | `EDITOR_OR_TOOLING_ROOT` |
+| Config/data | `DATA_CONFIG_ROOT` |
+| Tests | `UNIT_TEST_DIR` / `INTEGRATION_TEST_DIR` |
+| Hot regression paths | `PROJECT.md` “Review hot paths” |
+
+## Verification
+
+- Prefer unit tests for pure logic; integration for runtime flows
+- Exclude `SKIP_OR_DEMO_CATEGORY` unless the task is that demo pipeline
+- Never commit secrets / license blobs / generated caches unless intentional
+
+## Stop and ask when
+
+- Ambiguous product choice with multiple valid architectures
+- Production data-loss / security risk
+- Missing repro that only the user can provide

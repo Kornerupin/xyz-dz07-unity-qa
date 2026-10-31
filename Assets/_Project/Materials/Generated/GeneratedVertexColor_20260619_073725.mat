@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: GeneratedVertexColor_20260619_073725
+  m_Shader: {fileID: 4800000, guid: 4c4d9b0245beafb488e1ab70d9e223a4, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs: []
+    m_Ints: []
+    m_Floats:
+    - _Alpha: 0.46
+    - _FresnelIntensity: 8.14
+    - _FresnelPower: 2.84
+    - _OutlineAlpha: 0.569
+    - _OutlineWidth: 0.32
+    - _PulseAmount: 0.543
+    - _PulseFrequency: 0.75
+    - _RimWidth: 3.5
+    m_Colors:
+    - _BaseColor: {r: 1, g: 0, b: 0.088999934, a: 1}
+    - _FresnelColor: {r: 0.038, g: 0.17599997, b: 0.887, a: 1}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1

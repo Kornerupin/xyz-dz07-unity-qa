@@ -1,0 +1,24 @@
+---
+description: Autotest file conventions (universal — adjust globs to TEST_ROOT)
+globs: "**/*{Test,Tests,spec,Spec}*.*"
+alwaysApply: false
+---
+
+# Autotest File Rules (Universal)
+
+> **CUSTOMIZE:** Change `globs` to your real test paths, e.g. `Assets/_Project/Tests/**/*.cs` or `**/*.test.ts` or `**/test_*.py`.
+
+When editing files under the test tree:
+
+1. Put fast/unit cases in `UNIT_TEST_DIR`; runtime/integration in `INTEGRATION_TEST_DIR`.
+2. Reset shared fixtures (`TEST_HELPER_FACTORY`) in setup and teardown when state is shared.
+3. Follow `TEST_NAMING_PATTERN` and any existing comment/header style for scenarios.
+4. Extend helpers instead of duplicating environment wiring.
+5. Use async/frame/yield tests only when time or environment progression matters.
+6. Never assign `SKIP_OR_DEMO_CATEGORY` to product regression tests.
+7. Keep test project/assembly references intact; don't auto-wire test code into production entrypoints.
+8. Match assertion style already used in the suite.
+9. If adding categories/tags for filtering, document CI impact on `CI_WORKFLOW_PATH`.
+10. New assets that need sidecars (e.g. Unity `.meta`) must be valid for the stack.
+
+> **CUSTOMIZE (Unity example):** PlayMode → `Reset()` factory; `.meta` GUID 32 hex; NUnit `Assert.That`.

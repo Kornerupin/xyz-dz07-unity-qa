@@ -1,0 +1,35 @@
+---
+description: Pre-merge review checklist for developer PRs
+globs: "**/*"
+alwaysApply: false
+---
+
+# Pre-Merge Developer Review
+
+> **CUSTOMIZE:** Replace hot-path bullets with the list from `PROJECT.md`.
+
+When asked to review before merge:
+
+## Must check
+
+1. **Intent vs diff** — does the change match the stated goal?
+2. **Blast radius** — shared types, events, configs, routes, assets, API DTOs
+3. **Stack safety** — sidecars/refs intact; no generated cache noise
+4. **Regressions** — walk `PROJECT.md` hot paths
+5. **Tests** — appropriate unit vs integration; no hiding coverage under `SKIP_OR_DEMO_CATEGORY`
+6. **CI** — will `CI_WORKFLOW_PATH` still be meaningful?
+7. **Secrets / junk** — no licenses, binaries, caches unless intentional
+
+## Review output format
+
+```
+Verdict: APPROVE | REQUEST CHANGES | BLOCK
+Findings:
+- [P0/P1/P2] file:line — issue — why — suggested fix
+Test gaps:
+- ...
+Merge risks:
+- ...
+```
+
+Do not approve “looks fine” without citing concrete checks performed.

@@ -1,0 +1,179 @@
+{
+  "name": "AI QA gate - CraftTest",
+  "on": {
+    "push": {},
+    "workflow_dispatch": {}
+  },
+  "permissions": {
+    "contents": "read"
+  },
+  "concurrency": {
+    "group": "ai-qa-${{ github.ref }}",
+    "cancel-in-progress": false
+  },
+  "jobs": {
+    "craft-gate": {
+      "runs-on": "ubuntu-latest",
+      "timeout-minutes": 45,
+      "steps": [
+        {
+          "name": "Checkout",
+          "uses": "actions/checkout@v4"
+        },
+        {
+          "name": "Set up Python",
+          "uses": "actions/setup-python@v5",
+          "with": {
+            "python-version": "3.11"
+          }
+        },
+        {
+          "name": "Set up Node.js",
+          "uses": "actions/setup-node@v4",
+          "with": {
+            "node-version": "22"
+          }
+        },
+        {
+          "name": "Check analyzer and mutation safeguards",
+          "run": "python -m unittest discover -s tests -v\nnode tests/test_issue.cjs"
+        },
+        {
+          "name": "Cache Unity Library",
+          "uses": "actions/cache@v4",
+          "with": {
+            "path": "Library",
+            "key": "Library-Craft-6000.4.0f1-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}",
+            "restore-keys": "Library-Craft-6000.4.0f1-"
+          }
+        },
+        {
+          "name": "Run Unity EditMode and PlayMode tests",
+          "id": "unity_tests",
+          "uses": "game-ci/unity-test-runner@v4",
+          "env": {
+            "UNITY_LICENSE": "${{ secrets.UNITY_LICENSE }}",
+            "UNITY_EMAIL": "${{ secrets.UNITY_EMAIL }}",
+            "UNITY_PASSWORD": "${{ secrets.UNITY_PASSWORD }}",
+            "UNITY_SERIAL": "${{ secrets.UNITY_SERIAL }}"
+          },
+          "with": {
+            "projectPath": ".",
+            "unityVersion": "6000.4.0f1",
+            "testMode": "All",
+            "coverageEnabled": false,
+            "artifactsPath": "artifacts/unity",
+            "githubToken": "${{ secrets.GITHUB_TOKEN }}",
+            "checkName": "CraftTest results"
+          }
+        },
+        {
+          "name": "Require both crafting tests to have passed",
+          "run": "python tools/verify_unity_results.py --artifacts artifacts/unity"
+        },
+        {
+          "name": "Confirm an actual failed Unity test",
+          "id": "failure_evidence",
+          "if": "${{ failure() && steps.unity_tests.outcome == 'failure' }}",
+          "run": "python analyze_unity_logs.py --check-failure --artifacts artifacts/unity"
+        },
+        {
+          "name": "Preserve Unity logs",
+          "if": "${{ always() }}",
+          "uses": "actions/upload-artifact@v4",
+          "with": {
+            "name": "qa-unity-${{ github.run_number }}-${{ github.run_attempt }}",
+            "path": "artifacts/unity/",
+            "if-no-files-found": "warn",
+            "retention-days": 30
+          }
+        }
+      ],
+      "outputs": {
+        "test_failure": "${{ steps.failure_evidence.outputs.test_failure }}",
+        "unity_artifact": "qa-unity-${{ github.run_number }}-${{ github.run_attempt }}"
+      },
+      "permissions": {
+        "contents": "read",
+        "checks": "write"
+      }
+    },
+    "ai-report": {
+      "needs": [
+        "craft-gate"
+      ],
+      "if": "${{ failure() && needs.craft-gate.result == 'failure' && needs.craft-gate.outputs.test_failure == 'true' }}",
+      "runs-on": "ubuntu-latest",
+      "timeout-minutes": 40,
+      "permissions": {
+        "contents": "read",
+        "issues": "write"
+      },
+      "steps": [
+        {
+          "name": "Checkout",
+          "uses": "actions/checkout@v4"
+        },
+        {
+          "name": "Set up Python",
+          "uses": "actions/setup-python@v5",
+          "with": {
+            "python-version": "3.11"
+          }
+        },
+        {
+          "name": "Download failed Unity run",
+          "uses": "actions/download-artifact@v4",
+          "with": {
+            "name": "${{ needs.craft-gate.outputs.unity_artifact }}",
+            "path": "artifacts/unity"
+          }
+        },
+        {
+          "name": "Propagate the confirmed Unity test failure",
+          "run": "python analyze_unity_logs.py --propagate-failure --artifacts artifacts/unity",
+          "id": "failed_tests"
+        },
+        {
+          "name": "Install local CPU model runtime",
+          "run": "bash tools/install_ollama_ci.sh",
+          "id": "ollama_install",
+          "if": "${{ failure() && steps.failed_tests.outputs.test_failure == 'true' }}"
+        },
+        {
+          "name": "Analyze verified test failure with local AI",
+          "id": "analyze",
+          "env": {
+            "AI_PROVIDER": "ollama",
+            "AI_MODEL": "qwen2.5:3b-instruct"
+          },
+          "run": "python tools/run_ollama_analysis.py",
+          "if": "${{ failure() && steps.failed_tests.outputs.test_failure == 'true' && steps.ollama_install.outcome == 'success' }}"
+        },
+        {
+          "name": "Create AI bug report",
+          "id": "issue",
+          "if": "${{ failure() && needs.craft-gate.result == 'failure' && steps.failed_tests.outputs.test_failure == 'true' && steps.analyze.outcome == 'success' && steps.analyze.outputs.eligible == 'true' }}",
+          "uses": "actions/github-script@v7",
+          "with": {
+            "script": "return await require('./tools/create_ai_issue.cjs')({ github, context, core });"
+          }
+        },
+        {
+          "name": "Preserve analysis and model logs",
+          "if": "${{ always() }}",
+          "uses": "actions/upload-artifact@v4",
+          "with": {
+            "name": "qa-evidence-${{ github.run_number }}-${{ github.run_attempt }}",
+            "path": "artifacts/",
+            "if-no-files-found": "warn",
+            "retention-days": 30
+          }
+        }
+      ],
+      "env": {
+        "UNITY_ARTIFACT": "${{ needs.craft-gate.outputs.unity_artifact }}"
+      }
+    }
+  }
+}

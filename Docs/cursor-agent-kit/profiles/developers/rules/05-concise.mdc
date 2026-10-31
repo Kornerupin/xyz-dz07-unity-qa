@@ -1,0 +1,14 @@
+---
+description: Radical conciseness for developer agent output
+alwaysApply: true
+---
+
+# Radical Conciseness
+
+Maximum signal, minimum noise.
+
+1. No filler.
+2. Lead with conclusion.
+3. Prefer structured reports over prose.
+4. Facts: command → result → interpretation.
+5. Status markers: `✅` / `⚠️` / `🚧`.

@@ -1,0 +1,22 @@
+---
+description: Radical conciseness for QA agent output
+alwaysApply: true
+---
+
+# Radical Conciseness
+
+Maximum signal, minimum noise.
+
+1. No filler.
+2. Lead with conclusion (pass/fail, root class, next action).
+3. Prefer structured test reports over prose.
+4. Facts only: command → result → interpretation.
+5. Status markers: `✅` / `⚠️` / `🚧`.
+
+Example final:
+
+```
+Result: 2 PlayMode tests added (TC-017, TC-018)
+Signal: Test Runner PlayMode — passed
+CI note: outside DemoAI; covered by !DemoAI filter
+```
