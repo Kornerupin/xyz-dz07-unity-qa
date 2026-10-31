@@ -298,7 +298,10 @@ class LocalModelTests(Workspace):
         self.assertEqual(request.full_url, "http://127.0.0.1:11434/api/chat")
         self.assertNotIn("Authorization", request.headers)
         payload = json.loads(request.data)
-        self.assertEqual(payload["format"], analyzer.SCHEMA)
+        evidence = analyzer.collect_evidence(self.artifacts, self.root)
+        self.assertEqual(payload["format"], analyzer.grounded_report_schema(evidence))
+        self.assertEqual(payload["format"]["properties"]["evidence"]["items"]["enum"],
+                         ["Expected: 4", "But was: 3"])
         self.assertFalse(payload["stream"])
         self.assertEqual(payload["options"]["temperature"], 0)
         self.assertEqual(json.loads((self.output / "request.json").read_text()), payload)
@@ -307,6 +310,21 @@ class LocalModelTests(Workspace):
     def test_local_invented_quote_does_not_create_report(self):
         self.assertEqual(self.run_local({**REPORT, "evidence": ["invented database error"]}), 1)
         self.assert_blocked()
+
+    def test_source_quote_cannot_replace_actual_failure_evidence(self):
+        # A copied test name is real text, but it is not a failure-message quote.
+        self.assertEqual(self.run_local({**REPORT, "evidence": ["CraftTest.Test_CraftSword_ConsumesResources"]}), 1)
+        self.assert_blocked()
+
+    def test_quote_schema_uses_only_current_run_and_preserves_original_text(self):
+        first = analyzer.collect_evidence(self.artifacts, self.root)
+        other = {**first, "failed_tests": [{"message": "  Expected: less than 0.0f\n  But was:  17.2068291f\n"}]}
+        schema = analyzer.grounded_report_schema(other)
+        self.assertEqual(schema["properties"]["evidence"]["items"]["enum"],
+                         ["Expected: less than 0.0f", "But was:  17.2068291f"])
+        self.assertEqual(analyzer.grounded_report_schema(first)["properties"]["evidence"]["items"]["enum"],
+                         ["Expected: 4", "But was: 3"])
+        self.assertNotIn("enum", analyzer.SCHEMA["properties"]["evidence"]["items"])
 
     def test_local_incomplete_output_is_rejected(self):
         self.assertEqual(self.run_local(reason="length"), 1)

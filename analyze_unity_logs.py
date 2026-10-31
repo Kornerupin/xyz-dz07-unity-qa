@@ -126,6 +126,31 @@ def validate_report(report, evidence):
     return report
 
 
+def grounded_report_schema(evidence):
+    """Constrain quoted evidence to observed failure lines before generation."""
+    quotes = []
+    for test in evidence["failed_tests"]:
+        for line in test["message"].splitlines():
+            quote = line.strip()[:300]
+            if quote and quote not in quotes:
+                quotes.append(quote)
+    if not quotes:
+        raise EvidenceError("No failure message is available for the report")
+    schema = json.loads(json.dumps(SCHEMA))
+    schema["properties"]["evidence"] = {
+        "type": "array", "minItems": 1, "maxItems": 6,
+        "items": {"type": "string", "enum": quotes[:64]}}
+    return schema
+
+
+def validate_grounded_report(report, evidence):
+    validate_report(report, evidence["text"])
+    allowed = grounded_report_schema(evidence)["properties"]["evidence"]["items"]["enum"]
+    if len(report["evidence"]) > 6 or any(quote not in allowed for quote in report["evidence"]):
+        raise AnalysisError("AI evidence must select exact observed failure lines")
+    return report
+
+
 def request_report(evidence, api_key, model, client_factory=None, raw_response_path=None):
     if not api_key.strip():
         raise AnalysisError("AI_API_KEY is missing")
@@ -138,7 +163,7 @@ def request_report(evidence, api_key, model, client_factory=None, raw_response_p
         messages=[{"role": "system", "content": SYSTEM_PROMPT},
                   {"role": "user", "content": "Analyze evidence and return JSON:\n\n" + evidence["text"]}],
         response_format={"type": "json_schema", "json_schema": {
-            "name": "unity_failure_report", "strict": True, "schema": SCHEMA}})
+            "name": "unity_failure_report", "strict": True, "schema": grounded_report_schema(evidence)}})
     raw = response.model_dump(mode="json")
     if raw_response_path is not None:
         save_json(raw_response_path, raw)
@@ -156,17 +181,20 @@ def request_report(evidence, api_key, model, client_factory=None, raw_response_p
         report = json.loads(content)
     except json.JSONDecodeError as exc:
         raise AnalysisError("AI response is not valid JSON") from exc
-    return validate_report(report, evidence["text"]), raw
+    return validate_grounded_report(report, evidence), raw
 
 
 def ollama_request(evidence, model):
-    return {"model": model, "stream": False, "format": SCHEMA,
+    schema = grounded_report_schema(evidence)
+    return {"model": model, "stream": False, "format": schema,
             "options": OLLAMA_OPTIONS, "keep_alive": 0,
             "messages": [{"role": "system", "content": SYSTEM_PROMPT +
-                          "\nUse this JSON schema: " + json.dumps(SCHEMA)},
+                          "\nUse this JSON schema: " + json.dumps(schema)},
                          {"role": "user", "content":
-                          "Analyze the evidence. Quote short exact substrings from MESSAGE or SOURCE. "
-                          "Do not translate the evidence quotations. Keep the report under 700 words.\n\n" +
+                          "Analyze the evidence. For the evidence array, select exact failure lines "
+                          "from its enum in the schema. Do not translate, combine or rewrite them. "
+                          "Write your diagnosis and recommendations in Russian in their separate fields. "
+                          "Keep the report under 700 words.\n\n" +
                           evidence["text"]}]}
 
 
@@ -202,7 +230,7 @@ def request_ollama_report(evidence, model, raw_response_path=None, transport=Non
         report = json.loads(content)
     except ValueError as exc:
         raise AnalysisError("Local model report is not valid JSON") from exc
-    return validate_report(report, evidence["text"]), raw
+    return validate_grounded_report(report, evidence), raw
 
 
 def markdown(report, evidence, provenance):

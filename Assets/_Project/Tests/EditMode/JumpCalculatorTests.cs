@@ -31,10 +31,11 @@ namespace EchoesOfAscent.Tests.EditMode
         }
 
         [Test]
-        public void ScreenDeltaToLaunchVelocity_SupportsLeftDirection()
+        public void ScreenDeltaToLaunchVelocity_PullDownRight_LaunchesLeft()
         {
             var camera = CreateGameplayCamera();
-            var swipe = new SwipeData(new Vector2(400f, 300f), new Vector2(150f, 280f), 300f, 0.2f);
+            // A slingshot launch travels opposite to the downward pull gesture.
+            var swipe = new SwipeData(new Vector2(150f, 300f), new Vector2(400f, 280f), 300f, 0.2f);
             Vector3 velocity = calculator.ScreenDeltaToLaunchVelocity(swipe, config, camera);
 
             Assert.That(velocity.x, Is.LessThan(0f));
@@ -44,10 +45,10 @@ namespace EchoesOfAscent.Tests.EditMode
         }
 
         [Test]
-        public void ScreenDeltaToLaunchVelocity_SupportsRightDirection()
+        public void ScreenDeltaToLaunchVelocity_PullDownLeft_LaunchesRight()
         {
             var camera = CreateGameplayCamera();
-            var swipe = new SwipeData(new Vector2(150f, 300f), new Vector2(400f, 280f), 300f, 0.2f);
+            var swipe = new SwipeData(new Vector2(400f, 300f), new Vector2(150f, 280f), 300f, 0.2f);
             Vector3 velocity = calculator.ScreenDeltaToLaunchVelocity(swipe, config, camera);
 
             Assert.That(velocity.x, Is.GreaterThan(0f));
