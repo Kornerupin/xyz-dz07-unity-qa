@@ -15,9 +15,9 @@ git remote -v
 git push -u origin main
 ~~~
 
-Если Git предлагает вход, выбери браузер и войди в аккаунт Kornerupin. При запросе пароля в терминале не вводи пароль GitHub: используй вход через Git Credential Manager. Для явного запуска входа при необходимости выполни git credential-manager github login, затем повтори push. Наличие входа в браузере само по себе не означает авторизацию Git в терминале.
+origin настроен на git@github.com:Kornerupin/xyz-dz07-unity-qa.git. Git использует существующее SSH-подключение; вход через браузер и Git Credential Manager не требуются. Для отдельной проверки в своём PowerShell выполни ssh -T git@github.com. Успешный ответ должен содержать Hi Kornerupin! и сообщение об успешной аутентификации; GitHub при этом не предоставляет shell и может вернуть код 1.
 
-Повторные git init, git remote add и начальный git commit не нужны. Для этого репозитория уже выбран HTTPS backend OpenSSL с обычной проверкой сертификатов: это устраняет ошибку Schannel SEC_E_NO_CREDENTIALS в среде агента.
+Повторные git init, git remote add и начальный git commit не нужны. Адрес HTTPS в ссылке выше предназначен для просмотра репозитория в браузере; Git push использует SSH.
 
 ## 2. Проверь подготовленные Unity Secrets
 
@@ -109,7 +109,7 @@ git push
 
 ## Если что-то остановилось
 
-- Git просит авторизацию: войди через Git Credential Manager и повтори push.
+- Ошибка SSH: выполни ssh -T git@github.com в обычном PowerShell. При Permission denied (publickey) нужно проверить, что существующий ключ добавлен в аккаунт Kornerupin и доступен используемому SSH-клиенту. Не заменяй ключи и не переходи на HTTPS для обхода этой проверки.
 - Нет Actions: проверь .github/workflows/ai_qa_gate.yml в ветке main и разрешение Actions в Settings.
 - Ошибка Unity activation: перепроверь три Unity Secrets и официальную инструкцию GameCI.
 - Упала установка/загрузка модели: открой соответствующий шаг и artifacts/ollama/pull.log; затем Re-run failed jobs. Артефакт исходного Unity запуска передаётся по имени из родительской job.
