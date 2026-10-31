@@ -15,7 +15,7 @@ namespace EchoesOfAscent.Tests.PlayMode
         {
             int wood = 5;
             int iron = 4;
-            const int expectedRemainingWood = 4; // COURSE_MUTATION_POINT
+            const int expectedRemainingWood = 3; // COURSE_MUTATION_POINT
             bool crafted = CraftingRules.TryCraftSword(ref wood, ref iron, out string item);
             Debug.Log($"[QA TEST] CraftSword crafted={crafted}; wood={wood}; iron={iron}; item={item}");
             Assert.That(crafted, Is.True);
